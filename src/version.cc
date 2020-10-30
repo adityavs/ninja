@@ -18,7 +18,9 @@
 
 #include "util.h"
 
-const char* kNinjaVersion = "1.8.2.git";
+using namespace std;
+
+const char* kNinjaVersion = "1.10.1.git";
 
 void ParseVersion(const string& version, int* major, int* minor) {
   size_t end = version.find('.');

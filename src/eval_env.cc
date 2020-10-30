@@ -16,6 +16,8 @@
 
 #include "eval_env.h"
 
+using namespace std;
+
 string BindingEnv::LookupVariable(const string& var) {
   map<string, string>::iterator i = bindings_.find(var);
   if (i != bindings_.end())
@@ -65,6 +67,7 @@ const EvalString* Rule::GetBinding(const string& key) const {
 bool Rule::IsReservedBinding(const string& var) {
   return var == "command" ||
       var == "depfile" ||
+      var == "dyndep" ||
       var == "description" ||
       var == "deps" ||
       var == "generator" ||
@@ -127,6 +130,20 @@ string EvalString::Serialize() const {
       result.append("$");
     result.append(i->first);
     result.append("]");
+  }
+  return result;
+}
+
+string EvalString::Unparse() const {
+  string result;
+  for (TokenList::const_iterator i = parsed_.begin();
+       i != parsed_.end(); ++i) {
+    bool special = (i->second == SPECIAL);
+    if (special)
+      result.append("${");
+    result.append(i->first);
+    if (special)
+      result.append("}");
   }
   return result;
 }

@@ -17,7 +17,10 @@
 #include <stdio.h>
 #include <algorithm>
 
+#include "dyndep.h"
 #include "graph.h"
+
+using namespace std;
 
 void GraphViz::AddTarget(Node* node) {
   if (visited_nodes_.find(node) != visited_nodes_.end())
@@ -39,6 +42,13 @@ void GraphViz::AddTarget(Node* node) {
   if (visited_edges_.find(edge) != visited_edges_.end())
     return;
   visited_edges_.insert(edge);
+
+  if (edge->dyndep_ && edge->dyndep_->dyndep_pending()) {
+    std::string err;
+    if (!dyndep_loader_.LoadDyndeps(edge->dyndep_, &err)) {
+      Warning("%s\n", err.c_str());
+    }
+  }
 
   if (edge->inputs_.size() == 1 && edge->outputs_.size() == 1) {
     // Can draw simply.

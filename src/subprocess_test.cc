@@ -24,6 +24,8 @@
 #include <unistd.h>
 #endif
 
+using namespace std;
+
 namespace {
 
 #ifdef _WIN32
@@ -182,7 +184,7 @@ TEST_F(SubprocessTest, SetWithMulti) {
     "cmd /c echo hi",
     "cmd /c time /t",
 #else
-    "whoami",
+    "id -u",
     "pwd",
 #endif
   };

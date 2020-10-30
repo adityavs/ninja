@@ -17,7 +17,6 @@
 
 #include <stddef.h>
 #include <string>
-using namespace std;
 
 /// Prints lines of text, possibly overprinting previously printed lines
 /// if the terminal supports it.
@@ -27,16 +26,18 @@ struct LinePrinter {
   bool is_smart_terminal() const { return smart_terminal_; }
   void set_smart_terminal(bool smart) { smart_terminal_ = smart; }
 
+  bool supports_color() const { return supports_color_; }
+
   enum LineType {
     FULL,
     ELIDE
   };
   /// Overprints the current line. If type is ELIDE, elides to_print to fit on
   /// one line.
-  void Print(string to_print, LineType type);
+  void Print(std::string to_print, LineType type);
 
   /// Prints a string on a new line, not overprinting previous output.
-  void PrintOnNewLine(const string& to_print);
+  void PrintOnNewLine(const std::string& to_print);
 
   /// Lock or unlock the console.  Any output sent to the LinePrinter while the
   /// console is locked will not be printed until it is unlocked.
@@ -46,6 +47,9 @@ struct LinePrinter {
   /// Whether we can do fancy terminal control codes.
   bool smart_terminal_;
 
+  /// Whether we can use ISO 6429 (ANSI) color sequences.
+  bool supports_color_;
+
   /// Whether the caret is at the beginning of a blank line.
   bool have_blank_line_;
 
@@ -53,13 +57,13 @@ struct LinePrinter {
   bool console_locked_;
 
   /// Buffered current line while console is locked.
-  string line_buffer_;
+  std::string line_buffer_;
 
   /// Buffered line type while console is locked.
   LineType line_type_;
 
   /// Buffered console output while console is locked.
-  string output_buffer_;
+  std::string output_buffer_;
 
 #ifdef _WIN32
   void* console_;

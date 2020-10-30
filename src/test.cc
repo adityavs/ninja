@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #ifdef _WIN32
 #include <windows.h>
+#include <io.h>
 #else
 #include <unistd.h>
 #endif
@@ -33,22 +34,23 @@
 #include "manifest_parser.h"
 #include "util.h"
 
-namespace {
-
-#ifdef _WIN32
-#ifndef _mktemp_s
-/// mingw has no mktemp.  Implement one with the same type as the one
-/// found in the Windows API.
-int _mktemp_s(char* templ) {
-  char* ofs = strchr(templ, 'X');
-  sprintf(ofs, "%d", rand() % 1000000);
-  return 0;
+#ifdef _AIX
+extern "C" {
+        // GCC "helpfully" strips the definition of mkdtemp out on AIX.
+        // The function is still present, so if we define it ourselves
+        // it will work perfectly fine.
+        extern char* mkdtemp(char* name_template);
 }
 #endif
 
+using namespace std;
+
+namespace {
+
+#ifdef _WIN32
 /// Windows has no mkdtemp.  Implement it in terms of _mktemp_s.
 char* mkdtemp(char* name_template) {
-  int err = _mktemp_s(name_template);
+  int err = _mktemp_s(name_template, strlen(name_template) + 1);
   if (err < 0) {
     perror("_mktemp_s");
     return NULL;

@@ -22,6 +22,7 @@
 #include "metrics.h"
 #include "util.h"
 
+using namespace std;
 
 void Pool::EdgeScheduled(const Edge& edge) {
   if (depth_ != 0)
@@ -186,6 +187,7 @@ void State::Reset() {
     i->second->ResetState();
   for (vector<Edge*>::iterator e = edges_.begin(); e != edges_.end(); ++e) {
     (*e)->outputs_ready_ = false;
+    (*e)->deps_loaded_ = false;
     (*e)->mark_ = Edge::VisitNone;
   }
 }

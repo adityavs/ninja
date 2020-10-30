@@ -21,6 +21,8 @@
 
 #include "util.h"
 
+using namespace std;
+
 Subprocess::Subprocess(bool use_console) : child_(NULL) , overlapped_(),
                                            is_reading_(false),
                                            use_console_(use_console) {
@@ -59,8 +61,8 @@ HANDLE Subprocess::SetupPipe(HANDLE ioport) {
   }
 
   // Get the write end of the pipe as a handle inheritable across processes.
-  HANDLE output_write_handle = CreateFile(pipe_name, GENERIC_WRITE, 0,
-                                          NULL, OPEN_EXISTING, 0, NULL);
+  HANDLE output_write_handle =
+      CreateFileA(pipe_name, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
   HANDLE output_write_child;
   if (!DuplicateHandle(GetCurrentProcess(), output_write_handle,
                        GetCurrentProcess(), &output_write_child,
@@ -80,9 +82,10 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   security_attributes.nLength = sizeof(SECURITY_ATTRIBUTES);
   security_attributes.bInheritHandle = TRUE;
   // Must be inheritable so subprocesses can dup to children.
-  HANDLE nul = CreateFile("NUL", GENERIC_READ,
-          FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-          &security_attributes, OPEN_EXISTING, 0, NULL);
+  HANDLE nul =
+      CreateFileA("NUL", GENERIC_READ,
+                  FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                  &security_attributes, OPEN_EXISTING, 0, NULL);
   if (nul == INVALID_HANDLE_VALUE)
     Fatal("couldn't open nul");
 
@@ -124,7 +127,19 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
           "specified.\n";
       return true;
     } else {
-      Win32Fatal("CreateProcess");    // pass all other errors to Win32Fatal
+      fprintf(stderr, "\nCreateProcess failed. Command attempted:\n\"%s\"\n",
+              command.c_str());
+      const char* hint = NULL;
+      // ERROR_INVALID_PARAMETER means the command line was formatted
+      // incorrectly. This can be caused by a command line being too long or
+      // leading whitespace in the command. Give extra context for this case.
+      if (error == ERROR_INVALID_PARAMETER) {
+        if (command.length() > 0 && (command[0] == ' ' || command[0] == '\t'))
+          hint = "command contains leading whitespace";
+        else
+          hint = "is the command line too long?";
+      }
+      Win32Fatal("CreateProcess", hint);
     }
   }
 

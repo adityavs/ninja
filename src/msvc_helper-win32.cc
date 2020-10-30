@@ -18,6 +18,8 @@
 
 #include "util.h"
 
+using namespace std;
+
 namespace {
 
 string Replace(const string& input, const string& find, const string& replace) {
@@ -43,10 +45,10 @@ int CLWrapper::Run(const string& command, string* output) {
   security_attributes.bInheritHandle = TRUE;
 
   // Must be inheritable so subprocesses can dup to children.
-  HANDLE nul = CreateFile("NUL", GENERIC_READ,
-                          FILE_SHARE_READ | FILE_SHARE_WRITE |
-                          FILE_SHARE_DELETE,
-                          &security_attributes, OPEN_EXISTING, 0, NULL);
+  HANDLE nul =
+      CreateFileA("NUL", GENERIC_READ,
+                  FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                  &security_attributes, OPEN_EXISTING, 0, NULL);
   if (nul == INVALID_HANDLE_VALUE)
     Fatal("couldn't open nul");
 
@@ -58,8 +60,8 @@ int CLWrapper::Run(const string& command, string* output) {
     Win32Fatal("SetHandleInformation");
 
   PROCESS_INFORMATION process_info = {};
-  STARTUPINFO startup_info = {};
-  startup_info.cb = sizeof(STARTUPINFO);
+  STARTUPINFOA startup_info = {};
+  startup_info.cb = sizeof(STARTUPINFOA);
   startup_info.hStdInput = nul;
   startup_info.hStdError = ::GetStdHandle(STD_ERROR_HANDLE);
   startup_info.hStdOutput = stdout_write;

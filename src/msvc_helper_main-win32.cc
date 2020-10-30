@@ -24,6 +24,8 @@
 
 #include "getopt.h"
 
+using namespace std;
+
 namespace {
 
 void Usage() {
@@ -113,7 +115,7 @@ int MSVCHelperMain(int argc, char** argv) {
     PushPathIntoEnvironment(env);
   }
 
-  char* command = GetCommandLine();
+  char* command = GetCommandLineA();
   command = strstr(command, " -- ");
   if (!command) {
     Fatal("expected command line to end with \" -- command args\"");
